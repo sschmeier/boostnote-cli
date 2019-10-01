@@ -122,14 +122,11 @@ def parse_cmdline():
     parser_h = subparsers.add_parser("help", description="help.", help="Show help")
 
     # -----------------------------------------------------
-    ## future: add a view option based on title.
-    # parser_v = subparsers.add_parser(
-    #     "v", description="View notes.", help="View notes"
-    # )
+    parser_v = subparsers.add_parser("v", description="View notes.", help="View notes")
 
-    # parser_v.add_argument(
-    #     "v_str_search", metavar="STRING", help="String/RegExp to match in title"
-    # )
+    parser_v.add_argument(
+        "v_str_search", metavar="STRING", help="String/RegExp to match in title"
+    )
 
     # -----------------------------------------------------
     parser_s = subparsers.add_parser(
@@ -266,8 +263,8 @@ def main():
 
     if args.subparser == "s":
         regex_query = re.compile(args.s_str_search, re.IGNORECASE)
-    # elif args.subparser == "v":
-    #     regex_query = re.compile(args.v_str_search, re.IGNORECASE)
+    elif args.subparser == "v":
+        regex_query = re.compile(args.v_str_search, re.IGNORECASE)
 
     # loop notes
     titles = []
@@ -281,20 +278,36 @@ def main():
             else:
                 res = regex_query.match(note.title)
 
-            # print matching notes
+            # print titles of matching notes
             if not res:
                 continue
             else:
                 if args.s_print and args.s_fulltext:
                     sys.stdout.write(
-                        "{} | {}\n{}\n".format(
-                            note.title, note.tupdated, "\n".join(res)
+                        "{}\n{} | {}\n{}\n{}\n".format(
+                            "-" * 60,
+                            note.title,
+                            note.tupdated,
+                            "-" * 60,
+                            "\n".join(res),
                         )
                     )
-                    sys.stdout.write("{}\n".format("-" * 60))
                 else:
                     sys.stdout.write("{} | {}\n".format(note.title, note.tupdated))
-                
+
+        # view notes
+        if args.subparser == "v":
+            res = regex_query.match(note.title)
+            # print matching notes
+            if not res:
+                continue
+            else:
+                sys.stdout.write(
+                    "{}\n{} | {}\n{}\n{}\n".format(
+                        "-" * 60, note.title, note.tupdated, "-" * 60, note.content
+                    )
+                )
+
         # when listing notes, record time
         elif args.subparser == "ls":
             if args.ls_created:
