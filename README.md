@@ -44,6 +44,7 @@ git pull
 ## Usage
 
 - help
-- list
-- view
-- search
+- list (ls)
+- listtags (lst)
+- view (v)
+- search (s)

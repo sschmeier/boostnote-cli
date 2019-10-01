@@ -39,7 +39,9 @@ import time
 import re
 import datetime
 import dateutil.parser
+import collections
 from pathlib import Path
+
 
 # non-standard lib: For color handling on the shell
 try:
@@ -178,6 +180,7 @@ def parse_cmdline():
         default=False,
         help='List according to time created. [default: "Time updated"]',
     )
+
     parser_ls.add_argument(
         "-a",
         "--all",
@@ -185,6 +188,29 @@ def parse_cmdline():
         dest="ls_all",
         default=False,
         help='List all notes. [default: "List last 10"]',
+    )
+
+    # -----------------------------------------------------
+    parser_lst = subparsers.add_parser(
+        "lst", description="List tags.", help="List tags"
+    )
+
+    parser_lst.add_argument(
+        "-a",
+        "--all",
+        action="store_true",
+        dest="lst_all",
+        default=False,
+        help='List all tags. [default: "List 10 most frequent."]',
+    )
+
+    parser_lst.add_argument(
+        "-n",
+        "--name",
+        action="store_true",
+        dest="lst_name",
+        default=False,
+        help='List tags alphabetically. Prints all tags. [default: "List by frequency."]',
     )
 
     # if no arguments supplied print help
@@ -242,7 +268,9 @@ class BNote:
         self.title = res.group(1)
         res = re.search("tags:\s+(\[.*?\])", data, re.S)
         assert res
-        self.tags = eval(res.group(1))
+        tags = res.group(1)
+        tags = tags.replace('"\n', '",')
+        self.tags = eval(tags)
         res = re.search("content:\s+'''(.+?)'''", data, re.S)
         assert res
         self.content = res.group(1)
@@ -268,6 +296,7 @@ def main():
 
     # loop notes
     titles = []
+    d_tags = {}
     for note in notes:
         note = BNote(note)
 
@@ -307,13 +336,16 @@ def main():
                         "-" * 60, note.title, note.tupdated, "-" * 60, note.content
                     )
                 )
-
         # when listing notes, record time
         elif args.subparser == "ls":
             if args.ls_created:
                 titles.append((note.tcreated, note.title))
             else:
                 titles.append((note.tupdated, note.title))
+        # listing tags
+        elif args.subparser == "lst":
+            for tag in note.tags:
+                d_tags[tag] = d_tags.get(tag, []) + [note.title]
 
     if args.subparser == "ls":
         titles.sort()
@@ -322,6 +354,21 @@ def main():
             titles = titles[:10]
         for t in titles:
             sys.stdout.write("{} | {}\n".format(t[1], t[0]))
+
+    if args.subparser == "lst":
+        if args.lst_name:
+            sorted_d_tags = sorted(d_tags.items(), key=lambda kv: kv[0])
+
+        else:
+            sorted_d_tags = sorted(d_tags.items(), key=lambda kv: len(kv[1]))
+            sorted_d_tags.reverse()  # large to small
+            if not args.lst_all:
+                sorted_d_tags = sorted_d_tags[:10]
+
+        for t in sorted_d_tags:
+            a = t[1]
+            a.sort()
+            sys.stdout.write("{} | {} | {}\n".format(t[0], len(t[1]), "; ".join(a)))
 
     return
 
