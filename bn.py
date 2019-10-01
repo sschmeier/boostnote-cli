@@ -117,17 +117,29 @@ def parse_cmdline():
     )
 
     # sub programs
-    subparsers = parser.add_subparsers(dest='subparser')
+    subparsers = parser.add_subparsers(dest="subparser")
 
-    parser_h = subparsers.add_parser('help', description="help.", help="Show help")
- 
-    parser_s = subparsers.add_parser('s', description="Search for notes.", help="Search for notes")
-    parser_s.add_argument(
-        "s_str_search",
-        metavar="STRING",
-        help='String to search in title/text',
+    parser_h = subparsers.add_parser("help", description="help.", help="Show help")
+
+    # -----------------------------------------------------
+    ## future: add a view option based on title.
+    # parser_v = subparsers.add_parser(
+    #     "v", description="View notes.", help="View notes"
+    # )
+
+    # parser_v.add_argument(
+    #     "v_str_search", metavar="STRING", help="String/RegExp to match in title"
+    # )
+
+    # -----------------------------------------------------
+    parser_s = subparsers.add_parser(
+        "s", description="Search for notes.", help="Search for notes"
     )
-    
+
+    parser_s.add_argument(
+        "s_str_search", metavar="STRING", help="String/RegExp to search in title/text"
+    )
+
     parser_s.add_argument(
         "-f",
         "--fulltext",
@@ -137,7 +149,29 @@ def parse_cmdline():
         help='Search in full text. [default: "Search in title only"]',
     )
 
-    parser_ls = subparsers.add_parser('ls', description="List notes.", help="List notes")
+    parser_s.add_argument(
+        "-p",
+        "--print",
+        action="store_true",
+        dest="s_print",
+        default=False,
+        help='Print match in fulltext search. [default: "False"]',
+    )
+
+    ## future: search tags instead of title or fulltext
+    # parser_s.add_argument(
+    #     "-t",
+    #     "--tags",
+    #     action="store_true",
+    #     dest="s_tags",
+    #     default=False,
+    #     help='Search in tags. [default: "Search in title only"]',
+    # )
+
+    # -----------------------------------------------------
+    parser_ls = subparsers.add_parser(
+        "ls", description="List notes.", help="List notes"
+    )
 
     parser_ls.add_argument(
         "-c",
@@ -155,7 +189,7 @@ def parse_cmdline():
         default=False,
         help='List all notes. [default: "List last 10"]',
     )
-    
+
     # if no arguments supplied print help
     if len(sys.argv) == 1:
         parser.print_help()
@@ -184,6 +218,39 @@ def load_file(filename):
     return filehandle
 
 
+class BNote:
+    """ """
+
+    def __init__(self, fileobj):
+        self.file = fileobj
+        self.tcreated = None
+        self.ucreated = None
+        self.tags = None
+        self.title = None
+        self.content = None
+        self.parse()
+
+    def parse(self):
+        filehandle = open(self.file)
+        d = {}
+        data = filehandle.read()
+        res = re.search('createdAt: "(.+?)"', data)
+        assert res
+        self.tcreated = dateutil.parser.parse(res.group(1))
+        res = re.search('updatedAt: "(.+?)"', data)
+        assert res
+        self.tupdated = dateutil.parser.parse(res.group(1))
+        res = re.search('title: "(.+?)"', data)
+        assert res
+        self.title = res.group(1)
+        res = re.search("tags:\s+(\[.*?\])", data, re.S)
+        assert res
+        self.tags = eval(res.group(1))
+        res = re.search("content:\s+'''(.+?)'''", data, re.S)
+        assert res
+        self.content = res.group(1)
+
+
 def main():
     """ The main function. """
     args, parser = parse_cmdline()
@@ -193,69 +260,56 @@ def main():
     ndir = ndir.expanduser().resolve()
     if not ndir.exists():
         error('Path "{}" to notes does not exist. EXIT.'.format(ndir))
-    
+
     # scan for notes
     notes = ndir.glob("*.cson")
 
-    # regexps
-    regex_title = re.compile('title:\s+"(.+)"')
-
-    if args.subparser=="s":
+    if args.subparser == "s":
         regex_query = re.compile(args.s_str_search, re.IGNORECASE)
-    elif args.subparser == "ls":
-        if args.ls_created:
-            regex_time = re.compile('createdAt: "(.+)"')
-        else:
-            regex_time = re.compile('updatedAt: "(.+)"')
+    # elif args.subparser == "v":
+    #     regex_query = re.compile(args.v_str_search, re.IGNORECASE)
 
     # loop notes
     titles = []
     for note in notes:
-        text = note.read_text()
-
-        # get title
-        res1 = regex_title.search(text)
-        assert(res1)
-        title = res1.group(1)
+        note = BNote(note)
 
         # search notes
-        if args.subparser=="s":
+        if args.subparser == "s":
             if args.s_fulltext:
-                text_tmp = text.replace("\n"," ")
-                #print(text)
-                #print(text_tmp)
-                res = regex_query.match(text_tmp)
-                print(res)
+                res = regex_query.findall(note.content)
             else:
-                res = regex_query.match(title)
-
-
+                res = regex_query.match(note.title)
 
             # print matching notes
             if not res:
                 continue
             else:
-                sys.stdout.write(text)
-                sys.stdout.write("{}\n".format("-"*60))
-
+                if args.s_print and args.s_fulltext:
+                    sys.stdout.write(
+                        "{} | {}\n{}\n".format(
+                            note.title, note.tupdated, "\n".join(res)
+                        )
+                    )
+                    sys.stdout.write("{}\n".format("-" * 60))
+                else:
+                    sys.stdout.write("{} | {}\n".format(note.title, note.tupdated))
+                
         # when listing notes, record time
-        elif args.subparser=="ls":
-            res2 = regex_time.search(text)
-            assert(res2)
-            rtime = res2.group(1)
-            dt = dateutil.parser.parse(rtime)
-            titles.append((dt,title))
+        elif args.subparser == "ls":
+            if args.ls_created:
+                titles.append((note.tcreated, note.title))
+            else:
+                titles.append((note.tupdated, note.title))
 
-
-    if args.subparser=="ls":
+    if args.subparser == "ls":
         titles.sort()
         titles.reverse()
         if not args.ls_all:
             titles = titles[:10]
         for t in titles:
-            #print(t)
             sys.stdout.write("{} | {}\n".format(t[1], t[0]))
-    
+
     return
 
 
