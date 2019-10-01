@@ -205,12 +205,21 @@ def parse_cmdline():
     )
 
     parser_lst.add_argument(
-        "-n",
-        "--name",
+        "-s",
+        "--sort",
         action="store_true",
         dest="lst_name",
         default=False,
         help='List tags alphabetically. Prints all tags. [default: "List by frequency."]',
+    )
+
+    parser_lst.add_argument(
+        "-n",
+        "--notes",
+        action="store_true",
+        dest="lst_notes",
+        default=False,
+        help='List also notes belonging to the tags.  [default: "False"]',
     )
 
     # if no arguments supplied print help
@@ -358,7 +367,6 @@ def main():
     if args.subparser == "lst":
         if args.lst_name:
             sorted_d_tags = sorted(d_tags.items(), key=lambda kv: kv[0])
-
         else:
             sorted_d_tags = sorted(d_tags.items(), key=lambda kv: len(kv[1]))
             sorted_d_tags.reverse()  # large to small
@@ -366,9 +374,12 @@ def main():
                 sorted_d_tags = sorted_d_tags[:10]
 
         for t in sorted_d_tags:
-            a = t[1]
-            a.sort()
-            sys.stdout.write("{} | {} | {}\n".format(t[0], len(t[1]), "; ".join(a)))
+            if args.lst_notes:            
+                a = t[1]
+                a.sort()
+                sys.stdout.write("{} | {} | {}\n".format(t[0], len(t[1]), "; ".join(a)))
+            else:
+                sys.stdout.write("{} | {}\n".format(t[0], len(t[1])))
 
     return
 
