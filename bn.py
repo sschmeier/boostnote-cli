@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
-NAME: bn
-=========
+NAME: bn.py
+===========
 
 DESCRIPTION
 ===========
@@ -15,17 +15,23 @@ USAGE
 VERSION HISTORY
 ===============
 
+0.0.5    20191002
+0.0.4
+0.0.3
+0.0.2
 0.0.1    2019    Initial version.
 
 LICENCE
 =======
+
+See LICENSE file distributed with the repository.
 2019, copyright Sebastian Schmeier
 s.schmeier@protonmail.com // https://www.sschmeier.com
 
 template version: 2.0 (2018/12/19)
 """
-__version__ = "0.0.1"
-__date__ = "20191001"
+__version__ = "0.0.5"
+__date__ = "20191002"
 __email__ = "s.schmeier@protonmail.com"
 __author__ = "Sebastian Schmeier"
 
