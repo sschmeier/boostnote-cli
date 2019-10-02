@@ -145,7 +145,7 @@ def parse_cmdline():
         action="store_true",
         dest="s_fulltext",
         default=False,
-        help='Search in full text. [default: "Search in title only"]',
+        help="Search in fulltext instead",
     )
 
     parser_s.add_argument(
@@ -154,18 +154,18 @@ def parse_cmdline():
         action="store_true",
         dest="s_print",
         default=False,
-        help='Print match in fulltext search. [default: "False"]',
+        help="Print match in fulltext search",
     )
 
     ## future: search tags instead of title or fulltext
-    # parser_s.add_argument(
-    #     "-t",
-    #     "--tags",
-    #     action="store_true",
-    #     dest="s_tags",
-    #     default=False,
-    #     help='Search in tags. [default: "Search in title only"]',
-    # )
+    parser_s.add_argument(
+        "-t",
+        "--tags",
+        action="store_true",
+        dest="s_tags",
+        default=False,
+        help="Search in tags instead",
+    )
 
     # -----------------------------------------------------
     parser_ls = subparsers.add_parser(
@@ -178,7 +178,7 @@ def parse_cmdline():
         action="store_true",
         dest="ls_created",
         default=False,
-        help='List according to time created. [default: "Time updated"]',
+        help="List according to time created instead of updated",
     )
 
     parser_ls.add_argument(
@@ -187,7 +187,7 @@ def parse_cmdline():
         action="store_true",
         dest="ls_all",
         default=False,
-        help='List all notes. [default: "List last 10"]',
+        help="List all notes instead of last 10",
     )
 
     # -----------------------------------------------------
@@ -201,7 +201,7 @@ def parse_cmdline():
         action="store_true",
         dest="lst_all",
         default=False,
-        help='List all tags. [default: "List 10 most frequent."]',
+        help="List all tags instead of 10 most frequent",
     )
 
     parser_lst.add_argument(
@@ -210,7 +210,7 @@ def parse_cmdline():
         action="store_true",
         dest="lst_name",
         default=False,
-        help='List tags alphabetically. Prints all tags. [default: "List by frequency."]',
+        help="List tags alphabetically, prints all tags",
     )
 
     parser_lst.add_argument(
@@ -219,7 +219,7 @@ def parse_cmdline():
         action="store_true",
         dest="lst_notes",
         default=False,
-        help='List also notes belonging to the tags.  [default: "False"]',
+        help="List also notes belonging to the tags",
     )
 
     # if no arguments supplied print help
@@ -311,8 +311,15 @@ def main():
 
         # search notes
         if args.subparser == "s":
+            res = 0
             if args.s_fulltext:
                 res = regex_query.findall(note.content)
+            elif args.s_tags:
+                for tag in note.tags:
+                    results = regex_query.match(tag)
+                    if results:
+                        res = 1
+                        break
             else:
                 res = regex_query.match(note.title)
 
@@ -374,7 +381,7 @@ def main():
                 sorted_d_tags = sorted_d_tags[:10]
 
         for t in sorted_d_tags:
-            if args.lst_notes:            
+            if args.lst_notes:
                 a = t[1]
                 a.sort()
                 sys.stdout.write("{} | {} | {}\n".format(t[0], len(t[1]), "; ".join(a)))
