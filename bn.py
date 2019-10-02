@@ -289,14 +289,35 @@ def main():
     """ The main function. """
     args, parser = parse_cmdline()
 
-    # get notes path
-    ndir = Path(args.dir)
-    ndir = ndir.expanduser().resolve()
-    if not ndir.exists():
-        error('Path "{}" to notes does not exist. EXIT.'.format(ndir))
+    dirs = []
+    # check for a config file with path information
+    config = Path("~/.bn").expanduser().resolve()
+    if config.exists():
+        import yaml
+        config = yaml.load(open(config).read(), Loader=yaml.SafeLoader)
+        for d in config["dir"]:
+            ndir = Path(d)
+            ndir = ndir.expanduser().resolve()
+            if ndir.exists():
+                dirs.append(ndir)
 
-    # scan for notes
-    notes = ndir.glob("*.cson")
+        if len(dirs) == 0:
+            error('None of the paths in the config file exist. EXIT.')
+    else:
+        # get notes path
+        ndir = Path(args.dir)
+        ndir = ndir.expanduser().resolve()
+        dirs.append(ndir)
+        if not ndir.exists():
+            error('Path "{}" to notes does not exist. EXIT.'.format(ndir))
+
+    notes = []
+    for d in dirs:
+        # scan for notes
+        notes += ndir.glob("*.cson")
+
+    if len(notes) == 0:
+        error('No notes found in the path(s) specified. EXIT.')
 
     if args.subparser == "s":
         regex_query = re.compile(args.s_str_search, re.IGNORECASE)
@@ -329,7 +350,7 @@ def main():
             else:
                 if args.s_print and args.s_fulltext:
                     sys.stdout.write(
-                        "{}\n{} | {}\n{}\n{}\n".format(
+                        "{}\n{}\t{}\n{}\n{}\n".format(
                             "-" * 60,
                             note.title,
                             note.tupdated,
@@ -338,7 +359,7 @@ def main():
                         )
                     )
                 else:
-                    sys.stdout.write("{} | {}\n".format(note.title, note.tupdated))
+                    sys.stdout.write("{}\t{}\n".format(note.title, note.tupdated))
 
         # view notes
         if args.subparser == "v":
@@ -348,7 +369,7 @@ def main():
                 continue
             else:
                 sys.stdout.write(
-                    "{}\n{} | {}\n{}\n{}\n".format(
+                    "{}\n{}\t{}\n{}\n{}\n".format(
                         "-" * 60, note.title, note.tupdated, "-" * 60, note.content
                     )
                 )
@@ -369,7 +390,7 @@ def main():
         if not args.ls_all:
             titles = titles[:10]
         for t in titles:
-            sys.stdout.write("{} | {}\n".format(t[1], t[0]))
+            sys.stdout.write("{}\t{}\n".format(t[1], t[0]))
 
     if args.subparser == "lst":
         if args.lst_name:
@@ -384,9 +405,9 @@ def main():
             if args.lst_notes:
                 a = t[1]
                 a.sort()
-                sys.stdout.write("{} | {} | {}\n".format(t[0], len(t[1]), "; ".join(a)))
+                sys.stdout.write("{}\t{}\t{}\n".format(t[0], len(t[1]), "; ".join(a)))
             else:
-                sys.stdout.write("{} | {}\n".format(t[0], len(t[1])))
+                sys.stdout.write("{}\t{}\n".format(t[0], len(t[1])))
 
     return
 
