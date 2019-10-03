@@ -97,7 +97,7 @@ You can change the behavior by using arguments to the `bn ls` command:
 `bn lst` will list by default the ten most frequent tags from your notes.
 You can change the behavior by using arguments to the `bn lst` command:
 
-- `-a`: List all notes not only last ten
+- `-a`: List all notes not only ten most frequent ones
 - `-s`: List alphabetically, which will also print all tags
 - `-n`: List notes belonging to the tags
 
