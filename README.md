@@ -42,11 +42,11 @@ git pull
 
 ### Specify where to find your notes
 
-The default path for the tool to look for notes is in `~/Dropbox/Boostnote/notes`. 
+The default path for the tool to look for notes is in `~/Dropbox/Apps/Boostnote/notes`. 
 If you wish to change this path or add other paths where the tools should look, you need to use the `.bn` config-file.
 Copy the `.bn` config-file to your home directory.
 In this file you can specify a list of paths, where the tools will look for note-files.
-In case the default path (`~/Dropbox/Boostnote/notes`) is sufficient for your use case, there is no need to use the `.bn` config-file.
+In case the default path (`~/Dropbox/Apps/Boostnote/notes`) is sufficient for your use case, there is no need to use the `.bn` config-file.
 
 
 ## Usage

@@ -122,7 +122,7 @@ def parse_cmdline():
         metavar="PATH",
         dest="dir",
         default="~/Dropbox/Apps/Boostnote/notes",
-        help='Boostnote notes dir. [default: "~/Dropbox/Apps/Boostnote/notes"]',
+        help='Boostnote notes dir. Only used if no .bn config file present in home-dir. [default: "~/Dropbox/Apps/Boostnote/notes"]',
     )
 
     # sub programs
