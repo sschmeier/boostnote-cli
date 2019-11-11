@@ -15,11 +15,12 @@ USAGE
 VERSION HISTORY
 ===============
 
+0.0.6    20191112    Changed default location on Dropbox.
 0.0.5    20191002
 0.0.4
 0.0.3
 0.0.2
-0.0.1    2019    Initial version.
+0.0.1    2019XXXX    Initial version.
 
 LICENCE
 =======
@@ -120,8 +121,8 @@ def parse_cmdline():
         "--dir",
         metavar="PATH",
         dest="dir",
-        default="~/Dropbox/Boostnote/notes",
-        help='Boostnote notes dir. [default: "~/Dropbox/Boostnote/notes"]',
+        default="~/Dropbox/Apps/Boostnote/notes",
+        help='Boostnote notes dir. [default: "~/Dropbox/Apps/Boostnote/notes"]',
     )
 
     # sub programs
