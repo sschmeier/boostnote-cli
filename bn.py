@@ -31,8 +31,8 @@ s.schmeier@protonmail.com // https://www.sschmeier.com
 
 template version: 2.0 (2018/12/19)
 """
-__version__ = "0.0.5"
-__date__ = "20191002"
+__version__ = "0.0.6"
+__date__ = "20191112"
 __email__ = "s.schmeier@protonmail.com"
 __author__ = "Sebastian Schmeier"
 
