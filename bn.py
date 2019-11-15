@@ -287,7 +287,7 @@ class BNote:
         tags = res.group(1)
         tags = tags.replace('"\n', '",')
         self.tags = eval(tags)
-        res = re.search("content:\s+'''(.+?)'''", data, re.S)
+        res = re.search("content:\s+(?:'''|\")(.+?)(?:'''|\")", data, re.S)
         assert res
         self.content = res.group(1)
 
