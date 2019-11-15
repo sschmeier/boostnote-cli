@@ -271,7 +271,6 @@ class BNote:
 
     def parse(self):
         filehandle = open(self.file)
-        d = {}
         data = filehandle.read()
         res = re.search('createdAt: "(.+?)"', data)
         assert res
