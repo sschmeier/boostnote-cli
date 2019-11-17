@@ -79,7 +79,7 @@ optional arguments:
   -h, --help           show this help message and exit
   --version            show program's version number and exit
   -d PATH, --dir PATH  Boostnote notes dir. [default:
-                       "~/Dropbox/Boostnote/notes"]
+                       "~/Dropbox/Apps/Boostnote/notes""]
 ```
 
 
