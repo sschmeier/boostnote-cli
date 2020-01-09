@@ -1,5 +1,7 @@
 # CHANGELOG
 
+0.0.9    20190109    Added possibilty to show file paths of notes; fix title with double quotes; fix one line content with quotes
+0.0.8	 20190109    added bump2version config
 0.0.7    20191118    Double quotes now allowed for single line notes.
 0.0.6    20191112    Changed default location on Dropbox.
 0.0.5    20191002
