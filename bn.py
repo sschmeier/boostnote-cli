@@ -23,7 +23,7 @@ s.schmeier@pm.me // https://www.sschmeier.com
 
 template version: 2.0 (2018/12/19)
 """
-__version__ = "0.0.7"
+__version__ = "0.0.8"
 __date__ = "20191118"
 __email__ = "s.schmeier@pm.me"
 __author__ = "Sebastian Schmeier"
