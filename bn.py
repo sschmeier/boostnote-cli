@@ -12,29 +12,20 @@ INSTALLATION
 USAGE
 =====
 
-VERSION HISTORY
-===============
-
-0.0.7    20191118    Double quotes now allowed for single line notes.
-0.0.6    20191112    Changed default location on Dropbox.
-0.0.5    20191002
-0.0.4
-0.0.3
-0.0.2
-0.0.1    2019XXXX    Initial version.
+bn.py --help
 
 LICENCE
 =======
 
 See LICENSE file distributed with the repository.
 2019, copyright Sebastian Schmeier
-s.schmeier@protonmail.com // https://www.sschmeier.com
+s.schmeier@pm.me // https://www.sschmeier.com
 
 template version: 2.0 (2018/12/19)
 """
 __version__ = "0.0.7"
 __date__ = "20191118"
-__email__ = "s.schmeier@protonmail.com"
+__email__ = "s.schmeier@pm.me"
 __author__ = "Sebastian Schmeier"
 
 import sys
