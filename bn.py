@@ -24,7 +24,6 @@ s.schmeier@pm.me // https://www.sschmeier.com
 template version: 2.0 (2018/12/19)
 """
 __version__ = "0.0.8"
-__date__ = "20191118"
 __email__ = "s.schmeier@pm.me"
 __author__ = "Sebastian Schmeier"
 
@@ -101,7 +100,7 @@ def parse_cmdline():
     """ Parse command-line args. """
     # parse cmd-line ----------------------------------------------------------
     description = "Simple command-line interface to Boostnote."
-    version = "version {}, date {}".format(__version__, __date__)
+    version = "version {}".format(__version__)
     epilog = "Copyright {} ({})".format(__author__, __email__)
 
     parser = argparse.ArgumentParser(description=description, epilog=epilog)
@@ -127,6 +126,10 @@ def parse_cmdline():
 
     parser_v.add_argument(
         "v_str_search", metavar="STRING", help="String/RegExp to match in title"
+    )
+
+    parser_v.add_argument(
+        "--path", action="store_true", default=False, help="Show full path of note",
     )
 
     # -----------------------------------------------------
@@ -164,6 +167,10 @@ def parse_cmdline():
         dest="s_tags",
         default=False,
         help="Search in tags instead",
+    )
+
+    parser_s.add_argument(
+        "--path", action="store_true", default=False, help="Show full path of note",
     )
 
     # -----------------------------------------------------
@@ -270,7 +277,7 @@ class BNote:
         res = re.search('updatedAt: "(.+?)"', data)
         assert res
         self.tupdated = dateutil.parser.parse(res.group(1))
-        res = re.search('title: "(.+?)"', data)
+        res = re.search('title: "(.+)"', data)
         assert res
         self.title = res.group(1)
         res = re.search("tags:\s+(\[.*?\])", data, re.S)
@@ -278,7 +285,11 @@ class BNote:
         tags = res.group(1)
         tags = tags.replace('"\n', '",')
         self.tags = eval(tags)
-        res = re.search("content:\s+(?:'''|\")(.+?)(?:'''|\")", data, re.S)
+
+        # one line content only
+        res = re.search('content:\s+(?:")(.+)(?:")', data)
+        if not res:
+            res = re.search("content:\s+(?:''')(.+?)(?:''')", data, re.S)
         assert res
         self.content = res.group(1)
 
@@ -292,6 +303,7 @@ def main():
     config = Path("~/.bn").expanduser().resolve()
     if config.exists():
         import yaml
+
         config = yaml.load(open(config).read(), Loader=yaml.SafeLoader)
         for d in config["dir"]:
             ndir = Path(d)
@@ -300,7 +312,7 @@ def main():
                 dirs.append(ndir)
 
         if len(dirs) == 0:
-            error('None of the paths in the config file exist. EXIT.')
+            error("None of the paths in the config file exist. EXIT.")
     else:
         # get notes path
         ndir = Path(args.dir)
@@ -315,7 +327,7 @@ def main():
         notes += ndir.glob("*.cson")
 
     if len(notes) == 0:
-        error('No notes found in the path(s) specified. EXIT.')
+        error("No notes found in the path(s) specified. EXIT.")
 
     if args.subparser == "s":
         regex_query = re.compile(args.s_str_search, re.IGNORECASE)
@@ -357,7 +369,12 @@ def main():
                         )
                     )
                 else:
-                    sys.stdout.write("{}\t{}\n".format(note.title, note.tupdated))
+                    if args.path:
+                        sys.stdout.write(
+                            "{}\t{}\t{}\n".format(note.title, note.tupdated, note.file)
+                        )
+                    else:
+                        sys.stdout.write("{}\t{}\n".format(note.title, note.tupdated))
 
         # view notes
         if args.subparser == "v":
@@ -366,11 +383,24 @@ def main():
             if not res:
                 continue
             else:
-                sys.stdout.write(
-                    "{}\n{}\t{}\n{}\n{}\n".format(
-                        "-" * 60, note.title, note.tupdated, "-" * 60, note.content
+                if args.path:
+                    sys.stdout.write(
+                        "{}\n{}\t{}\n{}\nFILE: {}\n{}\n{}\n".format(
+                            "-" * 60,
+                            note.title,
+                            note.tupdated,
+                            "-" * 60,
+                            note.file,
+                            "-" * 60,
+                            note.content,
+                        )
                     )
-                )
+                else:
+                    sys.stdout.write(
+                        "{}\n{}\t{}\n{}\n{}\n".format(
+                            "-" * 60, note.title, note.tupdated, "-" * 60, note.content
+                        )
+                    )
         # when listing notes, record time
         elif args.subparser == "ls":
             if args.ls_created:
